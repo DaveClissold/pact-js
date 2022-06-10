@@ -16,6 +16,7 @@ import { localAddresses } from "../common/net"
 import * as url from "url"
 const HttpProxy = require("http-proxy")
 const bodyParser = require("body-parser")
+import { rehydrateBody } from "./bodyParser"
 
 export interface ProviderState {
   states?: [string]
@@ -128,8 +129,17 @@ export class Verifier {
     const app = express()
     const proxy = new HttpProxy()
 
-    app.use(this.stateSetupPath, bodyParser.json())
-    app.use(this.stateSetupPath, bodyParser.urlencoded({ extended: true }))
+    app.use(
+      bodyParser.json({
+        type: [
+          "application/json",
+          "application/json; charset=utf-8",
+          "application/json; charset=utf8",
+        ],
+      })
+    )
+    app.use(bodyParser.urlencoded({ extended: true }))
+    app.use("/*", bodyParser.raw({ type: "*/*" }))
     this.registerBeforeHook(app)
     this.registerAfterHook(app)
 
@@ -150,7 +160,7 @@ export class Verifier {
 
     // Proxy server will respond to Verifier process
     app.all("/*", (req, res) => {
-      logger.debug("Proxing", req.path)
+      logger.debug("Proxing", req.method, req.path)
       proxy.web(req, res, {
         changeOrigin: this.config.changeOrigin === true,
         secure: this.config.validateSSL === true,
@@ -158,6 +168,7 @@ export class Verifier {
       })
     })
 
+    rehydrateBody(proxy)
     return app
   }
 

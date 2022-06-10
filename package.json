@@ -125,6 +125,7 @@
     "@types/chai-as-promised": "0.0.31",
     "@types/cli-color": "^0.3.29",
     "@types/form-data": "^2.2.1",
+    "@types/http-proxy": "^1.17.9",
     "@types/lodash": "^4.14.73",
     "@types/lodash.isnil": "^4.0.3",
     "@types/mocha": "^7.0.2",
