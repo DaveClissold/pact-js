@@ -14,9 +14,8 @@ import { LogLevel } from "./options"
 import ConfigurationError from "../errors/configurationError"
 import { localAddresses } from "../common/net"
 import * as url from "url"
-const HttpProxy = require("http-proxy")
-const bodyParser = require("body-parser")
-import { rehydrateBody } from "./bodyParser"
+import * as HttpProxy from "http-proxy"
+import * as bodyParser from "body-parser"
 
 export interface ProviderState {
   states?: [string]
@@ -168,9 +167,32 @@ export class Verifier {
       })
     })
 
-    rehydrateBody(proxy)
+    proxy.on("proxyReq", (proxyReq: any, req: any) => {
+      this.parseBody(proxyReq, req)
+    })
+
     return app
   }
+  
+  private parseBody(proxyReq: any, req: any): void {
+    if (!req.body || !Object.keys(req.body).length) {
+      return
+    }
+
+    let bodyData
+
+    if (Buffer.isBuffer(req.body)) {
+      bodyData = req.body
+    } else if (typeof req.body === "object") {
+      bodyData = JSON.stringify(req.body)
+    }
+
+    if (bodyData) {
+      proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData))
+      proxyReq.write(bodyData)
+    }
+  };
+
 
   private createProxyStateHandler() {
     return (req: express.Request, res: express.Response) => {
