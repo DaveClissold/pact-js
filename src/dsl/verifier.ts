@@ -173,7 +173,7 @@ export class Verifier {
 
     return app
   }
-  
+
   private parseBody(proxyReq: http.ClientRequest, req: any): void {
     if (!req.body || !Object.keys(req.body).length) {
       return
@@ -191,8 +191,7 @@ export class Verifier {
       proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData))
       proxyReq.write(bodyData)
     }
-  };
-
+  }
 
   private createProxyStateHandler() {
     return (req: express.Request, res: express.Response) => {

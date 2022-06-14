@@ -9,7 +9,6 @@ import * as http from "http"
 import * as express from "express"
 import * as HttpProxy from "http-proxy"
 
-
 chai.use(chaiAsPromised)
 
 const expect = chai.expect
@@ -115,7 +114,6 @@ describe("Verifier", () => {
     })
   })
 
-  
   describe("#parseBody", () => {
     let proxyReq: any
 
@@ -126,7 +124,7 @@ describe("Verifier", () => {
 
     describe("when request body exists", () => {
       it("it writes the request if the body is a buffer", async () => {
-        let req: any = { body: "" }
+        const req: any = { body: "" }
         req.body = Buffer.from("foo")
         await v["parseBody"](proxyReq, req)
 
@@ -135,7 +133,7 @@ describe("Verifier", () => {
       })
 
       it("it writes the request if the body is an object", async () => {
-        let req = { body: { foo: "bar" } }
+        const req = { body: { foo: "bar" } }
         await v["parseBody"](proxyReq, req)
 
         expect(proxyReq.setHeader).to.have.been.called
@@ -145,7 +143,7 @@ describe("Verifier", () => {
 
     describe("when request body does not exist", () => {
       it("it does not invoke the request rewrite", async () => {
-        let req: any = "foo"
+        const req: any = "foo"
         await v["parseBody"](proxyReq, req)
 
         expect(proxyReq.setHeader).to.have.not.been.called
