@@ -9,6 +9,7 @@ import * as http from "http"
 import * as express from "express"
 import * as HttpProxy from "http-proxy"
 
+
 chai.use(chaiAsPromised)
 
 const expect = chai.expect
@@ -114,19 +115,13 @@ describe("Verifier", () => {
     })
   })
 
+  
   describe("#parseBody", () => {
-    let setHeaderStub: any
-    let writeStub: any
     let proxyReq: any
 
     beforeEach(() => {
       v = new Verifier(opts)
-      setHeaderStub = sinon.stub()
-      writeStub = sinon.stub()
-      proxyReq = {
-        setHeader: setHeaderStub,
-        write: writeStub,
-      }
+      proxyReq = sinon.createStubInstance(http.ClientRequest)
     })
 
     describe("when request body exists", () => {
@@ -135,14 +130,16 @@ describe("Verifier", () => {
         req.body = Buffer.from("foo")
         await v["parseBody"](proxyReq, req)
 
-        expect(writeStub).to.have.been.called
+        expect(proxyReq.setHeader).to.have.been.called
+        expect(proxyReq.write).to.have.been.called
       })
 
       it("it writes the request if the body is an object", async () => {
         let req = { body: { foo: "bar" } }
         await v["parseBody"](proxyReq, req)
 
-        expect(writeStub).to.have.been.called
+        expect(proxyReq.setHeader).to.have.been.called
+        expect(proxyReq.write).to.have.been.called
       })
     })
 
@@ -151,7 +148,8 @@ describe("Verifier", () => {
         let req: any = "foo"
         await v["parseBody"](proxyReq, req)
 
-        expect(writeStub).to.have.not.been.called
+        expect(proxyReq.setHeader).to.have.not.been.called
+        expect(proxyReq.write).to.have.not.been.called
       })
     })
   })

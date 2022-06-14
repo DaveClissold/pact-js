@@ -167,14 +167,14 @@ export class Verifier {
       })
     })
 
-    proxy.on("proxyReq", (proxyReq: any, req: any) => {
+    proxy.on("proxyReq", (proxyReq: http.ClientRequest, req: any) => {
       this.parseBody(proxyReq, req)
     })
 
     return app
   }
   
-  private parseBody(proxyReq: any, req: any): void {
+  private parseBody(proxyReq: http.ClientRequest, req: any): void {
     if (!req.body || !Object.keys(req.body).length) {
       return
     }
