@@ -7,6 +7,7 @@ import serviceFactory from "@pact-foundation/pact-node"
 import logger from "../common/logger"
 import * as http from "http"
 import * as express from "express"
+import * as HttpProxy from "http-proxy"
 
 chai.use(chaiAsPromised)
 
@@ -111,6 +112,64 @@ describe("Verifier", () => {
         expect(spy.callCount).to.eql(1)
       })
     })
+  })
+
+  describe("#parseBody", () => {
+    let setHeaderStub: any
+    let writeStub: any
+
+    beforeEach(() => {
+      v = new Verifier(opts)
+      setHeaderStub = sinon.stub();
+      writeStub = sinon.stub();
+    })
+
+    describe("when request body exists", () => {
+        it("it writes the request if the body is a buffer", async () => {
+          const setHeaderStub: any = sinon.stub();
+          const writeStub: any = sinon.stub();
+          let proxyReq = {
+            setHeader: setHeaderStub,
+            write: writeStub
+          }
+          let req: any = {body: ''}
+          req.body = Buffer.from('foo')
+
+          await v["parseBody"](proxyReq, req)
+
+          expect(setHeaderStub).to.have.been.called
+
+          expect(writeStub).to.have.been.called
+        })
+        
+        it("it writes the request if the body is an object", async () => {
+          let proxyReq = {
+            setHeader: setHeaderStub,
+            write: writeStub
+          }
+          let req = {body: {foo: 'bar'}}
+
+          await v["parseBody"](proxyReq, req)
+
+          expect(setHeaderStub).to.have.been.called
+        })
+      })
+    })
+   
+    describe("when request body does not exist", () => {
+        it("it does not invoke the request rewrite", async () => {
+          const setHeaderStub: any = sinon.stub();
+          const writeStub: any = sinon.stub();
+          let proxyReq = {
+            setHeader: setHeaderStub,
+            write: writeStub
+          }
+          let req: any = 'foo'
+
+          await v["parseBody"](proxyReq, req)
+
+          expect(writeStub).to.have.not.been.called
+        })
   })
 
   describe("#setupStates", () => {
